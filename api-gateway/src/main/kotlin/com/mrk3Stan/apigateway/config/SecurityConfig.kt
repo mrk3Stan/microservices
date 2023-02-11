@@ -12,7 +12,7 @@ class SecurityConfig {
 
     @Bean
     fun springSecurityFilterChain(serverHttpSecurity: ServerHttpSecurity): SecurityWebFilterChain {
-        return serverHttpSecurity.csrf()
+        serverHttpSecurity.csrf()
             .disable()
             .authorizeExchange { exchange -> exchange
                 .pathMatchers("/eureka/**")
@@ -20,7 +20,7 @@ class SecurityConfig {
                 .anyExchange()
                 .authenticated()
             }
-            .oauth2ResourceServer { ServerHttpSecurity.OAuth2ResourceServerSpec::JwtSpec }
-            .build()
+        serverHttpSecurity.oauth2ResourceServer { it.jwt() }
+        return serverHttpSecurity.build()
     }
 }

@@ -28,6 +28,16 @@ create database order_service;
 
 GRANT ALL PRIVILEGES ON `order_service`.* TO `user`@`%`;
 ```
+or
+```commandline
+docker exec -it mysql_db bash
+
+mysql -u root -p inventory-service
+
+create database order_service;
+
+GRANT ALL PRIVILEGES ON `order_service`.* TO `user`@`%`;
+```
 ### MongoDB
 from your terminal
 
@@ -44,6 +54,10 @@ brew services stop mongodb-community@6.0
 ./gradlew :discovery-server:bootRun
 ```
 Server dashboard url: http://localhost:8761/
+
+(eureka / password)
+
+Access Eureka through api-gateway: http://localhost:8080/eureka/web
 ### KeyCloak
 from your terminal
 ```commandline
@@ -69,6 +83,35 @@ Service Accounts Roles: enabled (the rest is disabled)
 
 Click Save
 
+For all the API request to work:
+
+Using POSTMAN
+
+Authorization
+
+Type: OAuth 2.0
+
+Configure New Token
+
+Token name: token
+
+Grant type: Client Credentials
+
+Access token url: http://localhost:8181/realms/spring-boot-microservices-realm/.well-known/openid-configuration
+
+Client ID: spring-cloud-client
+
+Client Secret: (from keycloak realm)
+
+Scope: openid offline_access
+
+Client Authentication: Send as basic Auth Header
+
+Get New Access Token
+
+Use Token
+
+
 ### API Gateway
 ### Product Service
 ```commandline
@@ -81,4 +124,8 @@ Click Save
 ### Order Service
 ```commandline
 ./gradlew :order-service:bootRun
+```
+### API Gateway
+```commandline
+./gradlew :api-gateway:bootRun
 ```
