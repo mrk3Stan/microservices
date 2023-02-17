@@ -111,6 +111,14 @@ Get New Access Token
 
 Use Token
 
+### Zipkin
+For distributed tracing.
+
+```commandline
+docker run -d -p 9411:9411 openzipkin/zipkin
+```
+Zipkin url: http://localhost:9411/zipkin/
+
 
 ### API Gateway
 ### Product Service

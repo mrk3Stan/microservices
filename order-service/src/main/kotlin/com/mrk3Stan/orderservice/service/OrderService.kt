@@ -10,6 +10,7 @@ import com.mrk3Stan.orderservice.model.OrderLineItems
 import com.mrk3Stan.orderservice.repository.OrderRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.sleuth.Tracer
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClient
@@ -27,6 +28,8 @@ class OrderService {
     private lateinit var webClientBuilder: WebClient.Builder
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var tracer: Tracer
 
     fun placeOrder(orderRequest: OrderRequest): String {
         val order = Order(
@@ -40,15 +43,23 @@ class OrderService {
             .map(OrderLineItems::skuCode)
             .toList()
 
-        val inventoryResponses = callInventoryService(skuCodes)
-        val allProductsInStock = inventoryResponses.stream().allMatch(InventoryResponse::isInStock)
+        val inventoryServiceLookup = tracer.nextSpan().name("InventoryServiceLookup")
+        try {
+            tracer.withSpan(inventoryServiceLookup.start()).use {
+                val inventoryResponses = callInventoryService(skuCodes)
+                val allProductsInStock = inventoryResponses.stream().allMatch(InventoryResponse::isInStock)
 
-        if (allProductsInStock) {
-            orderRepository.save(order)
-            return "Order places successfully."
-        } else {
-            throw IllegalArgumentException("Product not in stock!")
+                if (allProductsInStock) {
+                    orderRepository.save(order)
+                    return "Order placed successfully."
+                } else {
+                    throw IllegalArgumentException("Product not in stock!")
+                }
+            }
+        } finally {
+            inventoryServiceLookup.end()
         }
+
     }
 
     private fun mapToDto(orderLineItemsDto: OrderLineItemsDto) = OrderLineItems(
@@ -59,6 +70,8 @@ class OrderService {
         )
 
     private fun callInventoryService(skuCodes: List<String>): List<InventoryResponse> {
+        log.info("Calling inventory service")
+
         // call inventory service, and place order if product is in stock
         val inventoryResponseList: List<*>? = webClientBuilder.build().get()
             .uri("http://inventory-service/api/inventory") {

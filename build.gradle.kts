@@ -48,6 +48,9 @@ subprojects {
 		implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 		implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
+		implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
+		implementation("org.springframework.cloud:spring-cloud-sleuth-zipkin")
+
 		testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 		testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
