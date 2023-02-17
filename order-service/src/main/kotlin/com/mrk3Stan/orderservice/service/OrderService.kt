@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClient
-import java.util.*
+import java.util.UUID
 
 @Service
 @Transactional
@@ -28,7 +28,7 @@ class OrderService {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    fun placeOrder(orderRequest: OrderRequest) {
+    fun placeOrder(orderRequest: OrderRequest): String {
         val order = Order(
             orderNumber = UUID.randomUUID().toString(),
             orderLineItems = orderRequest.orderLineItemsDto
@@ -45,6 +45,7 @@ class OrderService {
 
         if (allProductsInStock) {
             orderRepository.save(order)
+            return "Order places successfully."
         } else {
             throw IllegalArgumentException("Product not in stock!")
         }
