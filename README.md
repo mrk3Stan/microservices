@@ -139,3 +139,7 @@ Zipkin url: http://localhost:9411/zipkin/
 ```commandline
 ./gradlew :api-gateway:bootRun
 ```
+### Notification Service
+```commandline
+./gradlew :notification-service:bootRun
+```
