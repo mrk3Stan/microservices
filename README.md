@@ -11,14 +11,16 @@ Demo multi-module project using different technologies.
 - Gradle
 - Docker
 - KeyCloak
+- Zipkin
+- Kafka
 
 ## Running locally
-### MySQL
+### MySQL, Kafka & Zookeeper
 start docker and run
 ```commandline
 docker-compose up
 ```
-this will start MySQL having inventory-service db
+this will start Kafka broker, zookeeper and MySQL having inventory-service db
 
 access the docker from your terminal and create order_service db
 ```commandline

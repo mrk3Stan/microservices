@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mrk3Stan.orderservice.dto.InventoryResponse
 import com.mrk3Stan.orderservice.dto.OrderLineItemsDto
 import com.mrk3Stan.orderservice.dto.OrderRequest
+import com.mrk3Stan.orderservice.event.OrderPlacedEvent
 import com.mrk3Stan.orderservice.model.Order
 import com.mrk3Stan.orderservice.model.OrderLineItems
 import com.mrk3Stan.orderservice.repository.OrderRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.sleuth.Tracer
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClient
@@ -30,6 +32,8 @@ class OrderService {
     private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var tracer: Tracer
+    @Autowired
+    private lateinit var kafkaTemplate: KafkaTemplate<String, OrderPlacedEvent>
 
     fun placeOrder(orderRequest: OrderRequest): String {
         val order = Order(
@@ -51,6 +55,7 @@ class OrderService {
 
                 if (allProductsInStock) {
                     orderRepository.save(order)
+                    kafkaTemplate.send("notificationTopic", OrderPlacedEvent(order.orderNumber))
                     return "Order placed successfully."
                 } else {
                     throw IllegalArgumentException("Product not in stock!")
